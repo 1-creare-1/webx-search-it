@@ -18,29 +18,55 @@ query.on_submit(function(content)
         visible = true
     end
 
-    local res = fetch({
-		url = "http://search.buss.lol/search",
-		method = "POST",
-		headers = { ["Content-Type"] = "application/json" },
-		body = '{ "query": "' .. content .. '" }',
-	})
+ --    local res = fetch({
+	-- 	url = "http://search.buss.lol/search",
+	-- 	method = "POST",
+	-- 	headers = { ["Content-Type"] = "application/json" },
+	-- 	body = '{ "query": "' .. content .. '" }',
+	-- })
 
-    for k, v in pairs(res) do
-        local link = links[k];
-        local desc = descriptions[k];
-        local domain = domains[k];
+	local domains = load_domains()
+
+    for i, _ in pairs(cards) do
+        local link = links[i];
+        local desc = descriptions[i];
+        local domain = domains[i];
         
-        local URL = percentage(v["rating"], -999, 2) .. "% | buss://" .. v["domain"];
-
-        domain.set_content(URL)
-        link.set_content(v["title"])
-        link.set_href("buss://" .. v["domain"])
-        desc.set_content(v["description"])
+        -- local URL = percentage(v["rating"], -999, 2) .. "% | buss://" .. v["domain"];
+		local domain = domains[i]
+		local url = domain["name"] .. "." .. domain["tld"]
+		
+        domain.set_content(url)
+        -- link.set_content(v["title"])
+        link.set_href("buss://" .. url)
+        -- desc.set_content(v["description"])
     end
 end)
 
-function LoadPage(p)
+function query_domain(ip)
+	-- https://github.com/creeperita09/Webx-bio
+	-- https://raw.githubusercontent.com/creeperita09/Webx-bio/main/index.html
+	local url = ip
+	if string.find(ip, "github") then
+		url = string.gsub(ip, "https://github.com/", "https://raw.githubusercontent.com/") .. "/main/index.html"
+	end
+    local res = fetch({
+		url = url,
+		method = "GET",
+		headers = { ["Content-Type"] = "application/json" },
+		body = '',
+	})
+	return res
+end
 
+function load_domains()
+    local res = fetch({
+		url = "https://api.buss.lol/domains",
+		method = "GET",
+		headers = { ["Content-Type"] = "application/json" },
+		body = '',
+	})
+	return res
 end
 
 function percentage(value, min, max)
