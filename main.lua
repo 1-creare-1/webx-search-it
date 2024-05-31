@@ -1,6 +1,6 @@
 if get == nil then get, fetch = require(game:GetService("ServerStorage").Types) end
 
-get("version").set_content("v0.0.5")
+get("version").set_content("v0.0.6")
 local query = get("query")
 local cards = get("card", true);
 
@@ -98,7 +98,7 @@ function SetPage(newPage)
 		page = 100
 	end
 	
-	get("pagenumber").set_content("p."..page)
+	get("pagenumber").set_content("Page "..page)
 	log("Page set to " .. page)
 end
 
