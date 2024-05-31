@@ -1,4 +1,6 @@
-get("version").set_content("v0.0.1")
+if get == nil then get, fetch = require(game:GetService("ServerStorage").Types) end
+
+get("version").set_content("v0.0.2")
 local query = get("query")
 local cards = get("card", true);
 
@@ -11,9 +13,13 @@ local visible = false;
 local page = 0
 local cardCount = #cards
 
-
+local outputLabel, errorLabel = get("output"), get("error")
 function log(msg)
-	get("error").set_content(msg)
+	outputLabel.set_content(msg)
+end
+
+function warn(msg)
+	errorLabel.set_content(msg)
 end
 
 function query_domain(ip)
@@ -102,27 +108,25 @@ log("Got domains")
 
 local sortedDomains = domainList
 
-query.on_submit(function(content)
-	if not visible then
-		for k,v in pairs(cards) do
-			v.set_opacity(1.0)
+query.on_submit(function(content)xpcall(function(content)
+		if not visible then
+			for k,v in pairs(cards) do
+				v.set_opacity(1.0)
+			end
+			visible = true
 		end
-		visible = true
-	end
-	
-	sortedDomains = sort_domains(domainList, content)
-	SetPage(0)
-	RenderDomains(sortedDomains)
-end)
 
+		sortedDomains = sort_domains(domainList, content)
+		SetPage(0)
+		RenderDomains(sortedDomains)
+end,warn,content)end)
 
-
-get("nextpagebtn").on_input(function()
+get("nextpagebtn").on_input(function(content)xpcall(function(content)
 	SetPage(page + 1)
 	RenderDomains(sortedDomains)
-end)
+end,warn)end)
 
-get("nextpagebtn").on_input(function()
+get("nextpagebtn").on_input(function(content)xpcall(function(content)
 	SetPage(page - 1)
 	RenderDomains(sortedDomains)
-end)
+end,warn)end)
