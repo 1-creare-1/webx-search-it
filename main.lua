@@ -1,6 +1,6 @@
 if get == nil then get, fetch = require(game:GetService("ServerStorage").Types) end
 
-get("version").set_content("v0.0.2")
+get("version").set_content("v0.0.3")
 local query = get("query")
 local cards = get("card", true);
 
