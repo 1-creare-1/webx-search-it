@@ -77,13 +77,13 @@ function RenderDomains(domainList)
 		local domain = domains[i];
 
 		-- local URL = percentage(v["rating"], -999, 2) .. "% | buss://" .. v["domain"];
-		local domain = domainList[i+page*cardCount]
-		local url = domainList["name"] .. "." .. domainList["tld"]
+		local thisDomain = domainList[i+page*cardCount]
+		local url = thisDomain["name"] .. "." .. thisDomain["tld"]
 
 		domain.set_content(url)
 		link.set_content(url)
 		link.set_href("buss://" .. url)
-		desc.set_content(domain["ip"])
+		desc.set_content(thisDomain["ip"])
 	end
 end
 
