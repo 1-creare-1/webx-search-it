@@ -1,6 +1,6 @@
 if get == nil then get, fetch = require(game:GetService("ServerStorage").Types) end
 
-get("version").set_content("v0.0.7")
+get("version").set_content("v0.0.8")
 local query = get("query")
 local cards = get("card", true);
 
@@ -93,7 +93,7 @@ end
 function sort_domains(domains, query)
 	local sorted = domains
 	table.sort(sorted, function(a, b)
-		return levenshtein(query, a) < levenshtein(query, b)
+		return levenshtein(query, a["name"]) < levenshtein(query, b["name"])
 	end)
 	
 	return sorted
