@@ -7,6 +7,15 @@ local domains = get("domain", true)
 
 local visible = false;
 
+local page = 0
+local cardCount = #cards
+
+log("Getting domains...")
+local domainList = load_domains()
+log("Got domains")
+
+local sortedDomains = {}
+
 query.on_submit(function(content)
     if not visible then
         print("turning shit visible....")
@@ -18,30 +27,19 @@ query.on_submit(function(content)
         visible = true
     end
 
- --    local res = fetch({
-	-- 	url = "http://search.buss.lol/search",
-	-- 	method = "POST",
-	-- 	headers = { ["Content-Type"] = "application/json" },
-	-- 	body = '{ "query": "' .. content .. '" }',
-	-- })
-		log("Getting domains...")
-		local domains = load_domains()
-
-		log("Got domains, rendering.")
-
     for i, _ in pairs(cards) do
         local link = links[i];
         local desc = descriptions[i];
         local domain = domains[i];
         
         -- local URL = percentage(v["rating"], -999, 2) .. "% | buss://" .. v["domain"];
-		local domain = domains[i]
-		local url = domain["name"] .. "." .. domain["tld"]
+	local domain = domainList[i+page*cardCount]
+	local url = domainList["name"] .. "." .. domainList["tld"]
 		
         domain.set_content(url)
-        -- link.set_content(v["title"])
+	link.set_content(url)
         link.set_href("buss://" .. url)
-        -- desc.set_content(v["description"])
+        desc.set_content(domain["ip"])
     end
 end)
 
@@ -73,6 +71,10 @@ function load_domains()
 		body = '',
 	})
 	return res
+end
+
+function search_domains(domains, query)
+	
 end
 
 function percentage(value, min, max)
