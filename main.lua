@@ -24,8 +24,10 @@ query.on_submit(function(content)
 	-- 	headers = { ["Content-Type"] = "application/json" },
 	-- 	body = '{ "query": "' .. content .. '" }',
 	-- })
+		log("Getting domains...")
+		local domains = load_domains()
 
-	local domains = load_domains()
+		log("Got domains, rendering.")
 
     for i, _ in pairs(cards) do
         local link = links[i];
@@ -42,6 +44,10 @@ query.on_submit(function(content)
         -- desc.set_content(v["description"])
     end
 end)
+
+function log(msg)
+		get("error").set_content(msg)
+end
 
 function query_domain(ip)
 	-- https://github.com/creeperita09/Webx-bio
