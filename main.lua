@@ -39,6 +39,10 @@ query.on_submit(function(content)
     end
 end)
 
+function LoadPage(p)
+
+end
+
 function percentage(value, min, max)
     if value < min then
         value = min
