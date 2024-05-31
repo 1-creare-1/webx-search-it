@@ -1,3 +1,4 @@
+get("version").set_content("v0.0.1")
 local query = get("query")
 local cards = get("card", true);
 
@@ -87,8 +88,8 @@ function SetPage(newPage)
 		page = 0
 	end
 	
-	if page > math.huge then
-		page = 0
+	if page > 100 then
+		page = 100
 	end
 	
 	get("pagenumber").set_content("p."..page)
@@ -109,9 +110,9 @@ query.on_submit(function(content)
 		visible = true
 	end
 	
-	sortedDomains = sort_domains(domains, content)
+	sortedDomains = sort_domains(domainList, content)
 	SetPage(0)
-	RenderDomains()
+	RenderDomains(sortedDomains)
 end)
 
 
