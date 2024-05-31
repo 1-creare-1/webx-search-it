@@ -1,6 +1,6 @@
 if get == nil then get, fetch = require(game:GetService("ServerStorage").Types) end
 
-get("version").set_content("v0.0.4")
+get("version").set_content("v0.0.5")
 local query = get("query")
 local cards = get("card", true);
 
@@ -122,13 +122,13 @@ query.on_submit(function(content)xpcall(function(content)
 		RenderDomains(sortedDomains)
 end,warn,content)end)
 
-get("nextpagebtn").on_input(function(content)xpcall(function(content)
+get("nextpagebtn").on_click(function(content)xpcall(function(content)
 	log("Next page")
 	SetPage(page + 1)
 	RenderDomains(sortedDomains)
 end,warn)end)
 
-get("prevpagebtn").on_input(function(content)xpcall(function(content)
+get("prevpagebtn").on_click(function(content)xpcall(function(content)
 	log("Preious page")
 	SetPage(page - 1)
 	RenderDomains(sortedDomains)
