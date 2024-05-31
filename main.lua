@@ -10,41 +10,9 @@ local visible = false;
 local page = 0
 local cardCount = #cards
 
-log("Getting domains...")
-local domainList = load_domains()
-log("Got domains")
-
-local sortedDomains = {}
-
-query.on_submit(function(content)
-    if not visible then
-        print("turning shit visible....")
-
-        for k,v in pairs(cards) do
-            v.set_opacity(1.0)
-        end
-
-        visible = true
-    end
-
-    for i, _ in pairs(cards) do
-        local link = links[i];
-        local desc = descriptions[i];
-        local domain = domains[i];
-        
-        -- local URL = percentage(v["rating"], -999, 2) .. "% | buss://" .. v["domain"];
-	local domain = domainList[i+page*cardCount]
-	local url = domainList["name"] .. "." .. domainList["tld"]
-		
-        domain.set_content(url)
-	link.set_content(url)
-        link.set_href("buss://" .. url)
-        desc.set_content(domain["ip"])
-    end
-end)
 
 function log(msg)
-		get("error").set_content(msg)
+	get("error").set_content(msg)
 end
 
 function query_domain(ip)
@@ -54,7 +22,7 @@ function query_domain(ip)
 	if string.find(ip, "github") then
 		url = string.gsub(ip, "https://github.com/", "https://raw.githubusercontent.com/") .. "/main/index.html"
 	end
-    local res = fetch({
+	local res = fetch({
 		url = url,
 		method = "GET",
 		headers = { ["Content-Type"] = "application/json" },
@@ -64,7 +32,7 @@ function query_domain(ip)
 end
 
 function load_domains()
-    local res = fetch({
+	local res = fetch({
 		url = "https://api.buss.lol/domains",
 		method = "GET",
 		headers = { ["Content-Type"] = "application/json" },
@@ -73,24 +41,87 @@ function load_domains()
 	return res
 end
 
-function search_domains(domains, query)
-	
+function sort_domains(domains, query)
+	return domains
 end
 
 function percentage(value, min, max)
-    if value < min then
-        value = min
-    elseif value > max then
-        value = max
-    end
-    
-    local percentage = ((value - min) / (max - min)) * 100
-    
-    if percentage < 0 then
-        percentage = 0
-    elseif percentage > 100 then
-        percentage = 100
-    end
+	if value < min then
+		value = min
+	elseif value > max then
+		value = max
+	end
 
-    return string.format("%.2f", percentage)
+	local percentage = ((value - min) / (max - min)) * 100
+
+	if percentage < 0 then
+		percentage = 0
+	elseif percentage > 100 then
+		percentage = 100
+	end
+
+	return string.format("%.2f", percentage)
 end
+
+function RenderDomains(domainList)
+	for i, _ in pairs(cards) do
+		local link = links[i];
+		local desc = descriptions[i];
+		local domain = domains[i];
+
+		-- local URL = percentage(v["rating"], -999, 2) .. "% | buss://" .. v["domain"];
+		local domain = domainList[i+page*cardCount]
+		local url = domainList["name"] .. "." .. domainList["tld"]
+
+		domain.set_content(url)
+		link.set_content(url)
+		link.set_href("buss://" .. url)
+		desc.set_content(domain["ip"])
+	end
+end
+
+function SetPage(newPage)
+	page = newPage
+	
+	if page < 0 then
+		page = 0
+	end
+	
+	if page > math.huge then
+		page = 0
+	end
+	
+	get("pagenumber").set_content("p."..page)
+end
+
+
+log("Getting domains...")
+local domainList = load_domains()
+log("Got domains")
+
+local sortedDomains = domainList
+
+query.on_submit(function(content)
+	if not visible then
+		for k,v in pairs(cards) do
+			v.set_opacity(1.0)
+		end
+		visible = true
+	end
+	
+	sortedDomains = sort_domains(domains, content)
+	SetPage(0)
+	RenderDomains()
+end)
+
+
+
+get("nextpagebtn").on_input(function()
+	SetPage(page + 1)
+	RenderDomains(sortedDomains)
+end)
+
+get("nextpagebtn").on_input(function()
+	SetPage(page - 1)
+	RenderDomains(sortedDomains)
+end)
