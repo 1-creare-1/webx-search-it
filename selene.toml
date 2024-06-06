@@ -1,4 +1,0 @@
-std = "roblox" # Use the roblox std
-
-[rules]
-multiple_statements = "allow"
