@@ -1,8 +1,8 @@
 local get, fetch = get, fetch
 
-local VERSION = "v1.0.0"
-local API_URL = "https://webx-external-api.vercel.app/api/v1"
--- local API_URL = "http://127.0.0.1:5000/api/v1"
+local VERSION = "v1.1.0"
+-- local API_URL = "https://webx-external-api.vercel.app/api/v1"
+local API_URL = "http://127.0.0.1:5000/api/v1"
 
 get("version").set_content(VERSION)
 
@@ -19,25 +19,45 @@ end
 log("Loaded")
 xpcall(function()
 
-
-
 local queryTextBox = get("query")
 
 -- Get the cards
 local cards = {}
 do
-	local links = get("results_link", true)
-	local descriptions = get("results_desc", true)
-	local scores = get("results_score", true)
+--[[
+
+<div>
+	<h6 class="card_icon">ICON</h6>
+	<div class="card_sublist">
+		<p class="card_sitename">Website Name</p>
+		<p class="card_url">buss://websitename.tld</p>
+	</div>
+</div>
+
+<a href="https://example.com" class="card_title">Website Title - Cool Stuff</a>
+<p class="card_description">Website Description lore ipsum lore ipsum lore ipsum lore ipsum lore ipsum lore ipsum lore ipsum </p>
+<p class="card_score">Rank 0</p>
+]]
 	local cardHolders = get("card", true)
-	log("ea sports")
+
+	local icons = get("card_icon", true)
+	local names = get("card_sitename", true) -- name part of name.tld with added spaces between words
+	local urls = get('card_url', true) -- Full buss:// url
+	local titles = get("card_title", true) -- The text that is in the <title> tag on the site
+	local descriptions = get("card_description", true) -- The description meta tag
+	local scores = get("card_score", true) -- How well the site scores
+
 	for i = 1, #cardHolders do
 		cards[i] = {
-			Link = links[i],
-			Description = descriptions[i],
-			Scores = scores[i],
-			Card = cardHolders[i],
+			icon = icons[i],
+			name = names[i],
+			url = urls[i],
+			title = titles[i],
+			description = descriptions[i],
+			score = scores[i],
+			card = cardHolders[i],
 		}
+		cardHolders[i].set_opacity(0.0)
 	end
 end
 log("Got cards")
@@ -56,7 +76,7 @@ local function make_query(term, limit, fuzziness)
 		return false, res.error
 	end
 	-- log("Got " .. #res .. " results: " .. res)
-	return true, res.domains
+	return true, res
 end
 
 local function render_cards(results)
@@ -64,19 +84,24 @@ local function render_cards(results)
 		local result = results[i]
 
 		if result == nil then
-			card.Card.set_opacity(0.0)
+			card.card.set_opacity(0.0)
 		else
-			card.Card.set_opacity(1.0)
+			card.card.set_opacity(1.0)
 			local domain = result[1]
 			local tld = result[2]
 			local score = result[3]
 
 			local url = domain .. "." .. tld
 
-			card.Scores.set_content(score)
-			card.Link.set_content(url)
-			card.Link.set_href("buss://" .. url)
-			-- card.Description.set_content()
+			local name = string.upper(string.sub(domain, 1, 1)) .. string.sub(domain, 2, -1)
+
+			card.icon.set_content(i)
+			card.name.set_content(name)
+			card.url.set_content("buss://" .. url .. "/")
+			card.title.set_content(domain .. " - Cool Stuff TODO")
+			card.title.set_href("buss://" .. url)
+			card.description.set_content("Description TODO")
+			card.score.set_content(score)
 		end
 	end
 end
@@ -113,12 +138,14 @@ function Search(content)
 		log("Searching for " .. firstWord)
 		local success, result = make_query(firstWord, #cards, 0.4)
 		if success then
-			render_cards(result)
+			render_cards(result.domains)
+			-- Show elapsed time & results
+			local elapsed = math.floor((result['elapsed_time'] + 0.5) * 100) / 100
+			get("query_results").set_content("About "..#result.domains.." results ("..elapsed.." seconds)")
 		else
 			render_cards({})
 			log(result)
 		end
-		
 	end,warn)
 end
 

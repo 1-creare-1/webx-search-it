@@ -1,68 +1,73 @@
 body {
-    background-color: #242424;
-    padding: 10px;
-    border-radius: 12px;
+    background-color: #1f1f1f;
+    padding: 2px;
+    margin-left: 15px;
+    margin-right: 15px;
 }
 
-main {
-    direction: column;
-    gap: 20px;
-}
-
-query {
-    width: 520px;
-    height: 5px;
-    padding: 10px;
-    font-size: 20px;
-}
-fuzziness {
-    width: 50px;
-    height: 5px;
-    padding: 10px;
-    font-size: 20px;
-}
-
-submain {
-    direction: column;
-    gap: 10px;
-}
-
-card {
-    opacity: 0.0;
-
-    direction: column;
-    padding: 10px;
-    border-radius: 12px;
-    border-width: 2px;
-    border-color: rgb(0, 0, 0);
-    border-style: solid;
-    gap: 5px;
+default_text {
+    font-family: Cascadia Code;
+    color: gainsboro;
 }
 
 a {
-    font-family: Cascadia Code;
-    letter-spacing: 4px;
+    color:chartreuse
+}
+
+navbar {
+    direction: row;
+    align-items: start;
+}
+
+navbar_column {
+    direction: column;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding: 0px;
+}
+
+
+
+query {
+    width: 520px;
+    height: 35px;
+    padding: 5px;
+    font-size: 15px;
+}
+
+search_results {
+    direction: column;
+    gap: 20px;
+    padding: 10px;
+}
+
+card {
+    direction: column;
+    gap: 0px;
+    height: 100px;
+}
+
+card_sublist {
+    direction: column;
+    gap: 0px;
+    height: 100px;
+}
+
+card_sitename {
     font-size: 12px;
 }
 
-p {
-    font-family: Corbel;
-    font-size: 12px;
+card_title {
+    font-size: 15px;
 }
 
-results_score {
-    font-family: Cascadia Code;
-    font-size: 9px;
+card_description {
+    font-size: 10px;
 }
-subheader {
-    font-family: Cascadia Code;
-    color: gainsboro;
-}
-txt {
-    font-family: Cascadia Code;
-    color: gainsboro;
-}
-header {
-    font-family: Cascadia Code;
-    color: gainsboro;
+
+navbar_column {
+    direction: column;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding: 0px;
 }

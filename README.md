@@ -1,1 +1,1 @@
-This is the frontend behind `https://search.buss.lol/search`, for Web X. Located at `buss://search.it`
+This is the frontend behind `https://webx-external-api.vercel.app/api/v1/docs`, for Web X. Located at `buss://search.it`
