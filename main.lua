@@ -1,18 +1,12 @@
-if get == nil then get, fetch = require(game:GetService("ServerStorage").Types) end
+local get, fetch = get, fetch
 
-get("version").set_content("v0.0.8")
-local query = get("query")
-local cards = get("card", true);
+local VERSION = "v1.0.0"
+local API_URL = "https://webx-external-api.vercel.app/api/v1"
+-- local API_URL = "http://127.0.0.1:5000/api/v1"
 
-local links = get("link", true)
-local descriptions = get("desc", true)
-local domains = get("domain", true)
+get("version").set_content(VERSION)
 
-local visible = false;
-
-local page = 0
-local cardCount = #cards
-
+-- Debug Helpers
 local outputLabel, errorLabel = get("output"), get("error")
 function log(msg)
 	outputLabel.set_content(msg)
@@ -22,161 +16,127 @@ function warn(msg)
 	errorLabel.set_content(msg)
 end
 
--- Returns the Levenshtein distance between the two given strings
-function levenshtein(str1, str2)
-	local len1 = string.len(str1)
-	local len2 = string.len(str2)
-	local matrix = {}
-	local cost = 0
+log("Loaded")
+xpcall(function()
 
-	-- quick cut-offs to save time
-	if (len1 == 0) then
-		return len2
-	elseif (len2 == 0) then
-		return len1
-	elseif (str1 == str2) then
-		return 0
+
+
+local queryTextBox = get("query")
+
+-- Get the cards
+local cards = {}
+do
+	local links = get("results_link", true)
+	local descriptions = get("results_desc", true)
+	local scores = get("results_score", true)
+	local cardHolders = get("card", true)
+	log("ea sports")
+	for i = 1, #cardHolders do
+		cards[i] = {
+			Link = links[i],
+			Description = descriptions[i],
+			Scores = scores[i],
+			Card = cardHolders[i],
+		}
 	end
-
-	-- initialise the base matrix values
-	for i = 0, len1, 1 do
-		matrix[i] = {}
-		matrix[i][0] = i
-	end
-	for j = 0, len2, 1 do
-		matrix[0][j] = j
-	end
-
-	-- actual Levenshtein algorithm
-	for i = 1, len1, 1 do
-		for j = 1, len2, 1 do
-			if (str1:byte(i) == str2:byte(j)) then
-				cost = 0
-			else
-				cost = 1
-			end
-
-			matrix[i][j] = math.min(matrix[i-1][j] + 1, matrix[i][j-1] + 1, matrix[i-1][j-1] + cost)
-		end
-	end
-
-	-- return the last value - this is the Levenshtein distance
-	return matrix[len1][len2]
 end
+log("Got cards")
+local page = 0
 
-function query_domain(ip)
-	-- https://github.com/creeperita09/Webx-bio
-	-- https://raw.githubusercontent.com/creeperita09/Webx-bio/main/index.html
-	local url = ip
-	if string.find(ip, "github") then
-		url = string.gsub(ip, "https://github.com/", "https://raw.githubusercontent.com/") .. "/main/index.html"
-	end
+local function make_query(term, limit, fuzziness)
+	-- Do not be the reason I need to add a ratelimit to this
 	local res = fetch({
-		url = url,
+		url = API_URL .. "/search?q="..term.."&fuzziness="..fuzziness.."&limit="..limit,
 		method = "GET",
 		headers = { ["Content-Type"] = "application/json" },
 		body = '',
 	})
-	return res
-end
 
-function load_domains()
-	local res = fetch({
-		url = "https://api.buss.lol/domains",
-		method = "GET",
-		headers = { ["Content-Type"] = "application/json" },
-		body = '',
-	})
-	return res
-end
-
-function sort_domains(domains, query)
-	local sorted = domains
-	table.sort(sorted, function(a, b)
-		return levenshtein(query, a["name"]) < levenshtein(query, b["name"])
-	end)
-	
-	return sorted
-end
-
-function percentage(value, min, max)
-	if value < min then
-		value = min
-	elseif value > max then
-		value = max
+	if res.error then
+		return false, res.error
 	end
-
-	local percentage = ((value - min) / (max - min)) * 100
-
-	if percentage < 0 then
-		percentage = 0
-	elseif percentage > 100 then
-		percentage = 100
-	end
-
-	return string.format("%.2f", percentage)
+	-- log("Got " .. #res .. " results: " .. res)
+	return true, res.domains
 end
 
-function RenderDomains(domainList)
-	for i, _ in pairs(cards) do
-		local link = links[i];
-		local desc = descriptions[i];
-		local domain = domains[i];
+local function render_cards(results)
+	for i, card in pairs(cards) do
+		local result = results[i]
 
-		-- local URL = percentage(v["rating"], -999, 2) .. "% | buss://" .. v["domain"];
-		local thisDomain = domainList[i+page*cardCount]
-		local url = thisDomain["name"] .. "." .. thisDomain["tld"]
+		if result == nil then
+			card.Card.set_opacity(0.0)
+		else
+			card.Card.set_opacity(1.0)
+			local domain = result[1]
+			local tld = result[2]
+			local score = result[3]
 
-		domain.set_content(url)
-		link.set_content(url)
-		link.set_href("buss://" .. url)
-		desc.set_content(thisDomain["ip"])
-	end
-end
+			local url = domain .. "." .. tld
 
-function SetPage(newPage)
-	page = newPage
-	
-	if page < 0 then
-		page = 0
-	end
-	
-	if page > 100 then
-		page = 100
-	end
-	
-	get("pagenumber").set_content("Page "..page)
-	log("Page set to " .. page)
-end
-
-
-log("Getting domains...")
-local domainList = load_domains()
-log("Got domains")
-
-local sortedDomains = domainList
-
-query.on_submit(function(content)xpcall(function(content)
-		if not visible then
-			for k,v in pairs(cards) do
-				v.set_opacity(1.0)
-			end
-			visible = true
+			card.Scores.set_content(score)
+			card.Link.set_content(url)
+			card.Link.set_href("buss://" .. url)
+			-- card.Description.set_content()
 		end
+	end
+end
 
-		sortedDomains = sort_domains(domainList, content)
-		SetPage(0)
-		RenderDomains(sortedDomains)
-end,warn,content)end)
+local function split_string(inputstr, sep)
+	if sep == nil then
+	  sep = "%s"
+	end
+	local t = {}
+	for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+	  table.insert(t, str)
+	end
+	return t
+  end
 
-get("nextpagebtn").on_click(function(content)xpcall(function(content)
-	log("Next page")
-	SetPage(page + 1)
-	RenderDomains(sortedDomains)
-end,warn)end)
+-- function SetPage(newPage)
+-- 	page = newPage
+	
+-- 	if page < 0 then
+-- 		page = 0
+-- 	end
+	
+-- 	if page > 100 then
+-- 		page = 100
+-- 	end
+	
+-- 	get("pagenumber").set_content("Page "..page)
+-- 	log("Page set to " .. page)
+-- end
 
-get("prevpagebtn").on_click(function(content)xpcall(function(content)
-	log("Preious page")
-	SetPage(page - 1)
-	RenderDomains(sortedDomains)
-end,warn)end)
+function Search(content)
+	xpcall(function()
+		local firstWord = split_string(content, " ")[1]
+		log("Searching for " .. firstWord)
+		local success, result = make_query(firstWord, #cards, 0.4)
+		if success then
+			render_cards(result)
+		else
+			render_cards({})
+			log(result)
+		end
+		
+	end,warn)
+end
+
+get("searchbtn").on_click(function()
+	Search(queryTextBox.get_content())
+end)
+
+queryTextBox.on_submit(Search)
+
+-- get("nextpagebtn").on_click(function()xpcall(function()
+-- 	-- log("Next page")
+-- 	-- SetPage(page + 1)
+-- 	-- RenderDomains(sortedDomains)
+-- end,warn)end)
+
+-- get("prevpagebtn").on_click(function()xpcall(function()
+-- 	-- log("Preious page")
+-- 	-- SetPage(page - 1)
+-- 	-- RenderDomains(sortedDomains)
+-- end,warn)end)
+end,warn)

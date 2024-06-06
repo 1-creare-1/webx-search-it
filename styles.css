@@ -15,6 +15,12 @@ query {
     padding: 10px;
     font-size: 20px;
 }
+fuzziness {
+    width: 50px;
+    height: 5px;
+    padding: 10px;
+    font-size: 20px;
+}
 
 submain {
     direction: column;
@@ -44,11 +50,19 @@ p {
     font-size: 12px;
 }
 
-domain {
+results_score {
     font-family: Cascadia Code;
     font-size: 9px;
 }
 subheader {
+    font-family: Cascadia Code;
+    color: gainsboro;
+}
+txt {
+    font-family: Cascadia Code;
+    color: gainsboro;
+}
+header {
     font-family: Cascadia Code;
     color: gainsboro;
 }
