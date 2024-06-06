@@ -90,6 +90,9 @@ local function render_cards(results)
 			local domain = result[1]
 			local tld = result[2]
 			local score = result[3]
+			local title = result[4]
+			local icon = result[5]
+			local description = result[6]
 
 			local url = domain .. "." .. tld
 
@@ -98,10 +101,10 @@ local function render_cards(results)
 			card.icon.set_content(i)
 			card.name.set_content(name)
 			card.url.set_content("buss://" .. url .. "/")
-			card.title.set_content(domain .. " - Cool Stuff TODO")
+			card.title.set_content(title)
 			card.title.set_href("buss://" .. url)
-			card.description.set_content("Description TODO")
-			card.score.set_content(score)
+			card.description.set_content(description)
+			card.score.set_content("Score " .. score)
 		end
 	end
 end
