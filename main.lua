@@ -1,8 +1,8 @@
 local get, fetch = get, fetch
 
 local VERSION = "v1.1.0"
--- local API_URL = "https://webx-external-api.vercel.app/api/v1"
-local API_URL = "http://127.0.0.1:5000/api/v1"
+local API_URL = "https://webx-external-api.vercel.app/api/v1"
+-- local API_URL = "http://127.0.0.1:5000/api/v1"
 
 get("version").set_content(VERSION)
 
@@ -79,6 +79,29 @@ local function make_query(term, limit, fuzziness)
 	return true, res
 end
 
+local function query_site_count()
+	-- Do not be the reason I need to add a ratelimit to this
+	local res = fetch({
+		url = API_URL .. "/count",
+		method = "GET",
+		headers = { ["Content-Type"] = "application/json" },
+		body = '',
+	})
+
+	if res.success then
+		return true, res.count
+	else
+		return false, res.error
+	end
+end
+local TOTAL_DOMAINS = "ERROR"
+do
+	local success, count = query_site_count()
+	if success then
+		TOTAL_DOMAINS = count
+	end
+end
+
 local function render_cards(results)
 	for i, card in pairs(cards) do
 		local result = results[i]
@@ -152,6 +175,7 @@ function Search(content)
 	end,warn)
 end
 
+get("info_header").set_content("About " .. TOTAL_DOMAINS .. " total Websites! Please give up to 24 hours for your domain to be listed. Created by _creare_")
 get("searchbtn").on_click(function()
 	Search(queryTextBox.get_content())
 end)
