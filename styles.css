@@ -65,9 +65,7 @@ card_description {
     font-size: 10px;
 }
 
-navbar_column {
-    direction: column;
-    margin-top: 0px;
-    margin-bottom: 0px;
-    padding: 0px;
+pagenumber {
+    margin-left: 20px;
+    margin-right: 20px;
 }
