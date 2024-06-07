@@ -169,7 +169,7 @@ get("luckybtn").on_click(function()xpcall(function()
 	if success then
 		render_cards({response.page})
 		-- Show elapsed time & results
-		local elapsed = math.floor((response['elapsed_time'] + 0.5) * 100) / 100
+		local elapsed = math.floor(response['elapsed_time'] * 100) / 100
 		get("query_results").set_content("Random site in " .. elapsed .. " seconds")
 	else
 		warn(response.error)
